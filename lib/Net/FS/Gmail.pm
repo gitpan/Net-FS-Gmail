@@ -5,7 +5,7 @@ use Mail::Webmail::Gmail;
 use File::Basename;
 use Time::ParseDate;
 use URI::Escape;
-our $VERSION           = "0.1";
+our $VERSION           = "0.2";
 our $FILESTORE_VERSION = "0.1"; # this way we can track different revisions of filestore format
 
 =head1 NAME
@@ -132,7 +132,7 @@ sub versions {
             push @versions, { id => $id, timestamp => $epoch_date };
         }
     }
-    return sort { $a->{timestamp} <=> $b->{timestamp}  } @versions;
+    return sort { $b->{timestamp} <=> $a->{timestamp}  } @versions;
 }
 
 
@@ -156,6 +156,63 @@ sub files {
     return @files;
 }
 
+
+=head2 delete <file> [version]
+
+Delete a file. If you pass a version number than only delete that version.
+
+=cut
+
+sub delete {
+    my $self    = shift;
+    my $file    = shift;
+    my $version = shift;
+    
+    $self->_delete($file, 1, $version);
+}
+
+=head2 remove <file> [version]
+
+The same as remove except that the file is merely moved to the trash.
+
+=cut
+
+sub remove {
+    my $self    = shift;
+    my $file    = shift;
+    my $version = shift;
+    
+    $self->_delete($file, 0, $version);
+}
+
+
+sub _delete {
+    my $self    = shift;
+    my $file    = shift;
+    my $delete  = shift;
+    my $version = shift;
+
+
+    my @versions = $self->versions($file);
+
+    die "Couldn't find $file\n" unless @versions;
+
+    my @mids;
+    if (!defined $version) {
+        @mids = map { $_->{id} } @versions; 
+    } elsif ($version > @versions || $version < 1) {
+        die "No such version $version\n";
+    } else {
+        push @mids, $versions[-$version]->{id};
+    }
+    print STDERR "Deleting ".join(", ", @mids)."\n";
+    
+    $self->{_gmail}->delete_message( msgid => [ @mids ], del_message => $delete );
+
+
+}
+
+
 =head2 quota 
 
 Get your current remaining quota, just like in Mail::Webmail::Gmail i.e
@@ -167,7 +224,7 @@ If called in list context, returns an array as follows:
 
 =cut
 
-=sub quota {
+sub quota {
     my $self = shift;
     return $self->{_gmail}->size_usage();
 }

@@ -6,7 +6,7 @@ WriteMakefile
           'VERSION_FROM' => 'lib/Net/FS/Gmail.pm',
           'PREREQ_PM' => {
                            'File::Basename' => '0',
-                           'Mail::Webmail::Gmail' => '0',
+                           'Mail::Webmail::Gmail' => '1.05.1',
                            'Test::More' => '0',
                            'Time::ParseDate' => '0',
                            'URI::Escape' => '0'

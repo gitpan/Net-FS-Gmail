@@ -8,7 +8,7 @@ my $build = Module::Build
          requires    => {
                           'Test::More'            => 0,
                           'File::Basename'        => 0,
-                          'Mail::Webmail::Gmail'  => 0,
+                          'Mail::Webmail::Gmail'  => '1.05.1',
                           'Time::ParseDate'       => 0,
                           'URI::Escape'           => 0,
                         },
